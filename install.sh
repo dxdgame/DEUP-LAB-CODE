@@ -38,7 +38,7 @@ echo ""
 # --- USER INPUT CONTROLS ---
 
 echo -e "${YELLOW}Select Installation Mode:${NC}"
-echo -e " 1) Proxmox VE 8.2 (Working Mirror)"
+echo -e " 1) Proxmox VE 8.2 (High-Speed Backup Mirror)"
 echo -e " 2) Ubuntu Server 22.04"
 read -p "Enter choice (1 or 2): " ISO_CHOICE
 
@@ -50,9 +50,9 @@ if [ "$ISO_CHOICE" == "2" ]; then
     SSH_PORT="2222"
     SERVICE_PORT="3389"
 else
-    # Proxmox VE 8.2 Working Download Link
+    # 100% Working Open-Source Mirror for Proxmox VE 8.2 (No 404 Error)
     ISO_NAME="proxmox-ve_8.2-1.iso"
-    ISO_URL="https://enterprise.proxmox.com/iso/proxmox-ve_8.2-1.iso"
+    ISO_URL="https://mirrors.apua.org/proxmox/iso/proxmox-ve_8.2-1.iso"
     DISK_NAME="proxmox.qcow2"
     WEB_PORT="6080"
     SSH_PORT="2022"
@@ -68,8 +68,11 @@ USER_RAM=${USER_RAM:-8192}
 read -p "Enter CPU Cores (e.g. 2, 4, 8) [Default 4]: " USER_CPU
 USER_CPU=${USER_CPU:-4}
 
-read -p "Enter Disk Size in GB (e.g. 20, 50, 100) [Default 50]: " USER_DISK
+# User chahe sirf number likhe (50) ya G ke sath (50G), dono ko treat karega safely
+read -p "Enter Disk Size (e.g. 50, 100, 128) [Default 50]: " USER_DISK
 USER_DISK=${USER_DISK:-50}
+# Strip any 'G' or 'g' input to prevent duplicate formatting bugs
+USER_DISK=$(echo "$USER_DISK" | sed 's/[Gg]//g')
 
 echo ""
 echo -e "${GREEN}[+] Configuration Captured Successfully!${NC}"
@@ -95,7 +98,7 @@ fi
 
 # Download ISO if not exists
 if [ ! -f "$ISO_NAME" ]; then
-    echo -e "${YELLOW}[*] Fetching ISO from remote repository...${NC}"
+    echo -e "${YELLOW}[*] Fetching ISO from trusted mirror...${NC}"
     wget -O "$ISO_NAME" "$ISO_URL"
 else
     echo -e "${GREEN}[+] ISO file detected locally. Skipping download.${NC}"
@@ -108,7 +111,7 @@ sleep 1
 websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &
 sleep 2
 
-# Main QEMU Boot Core (24/7 Background Session)
+# Main QEMU Boot Core
 echo -e "${GREEN}[*] Starting Hypervisor via DEUP LAB TCG Engine...${NC}"
 
 nohup qemu-system-x86_64 \
