@@ -20,7 +20,7 @@ echo -e "${MAGENTA}   | | | |  _| | | | | |_) | | |     / _ \\  |  _ \\ ${NC}"
 echo -e "${MAGENTA}   | |_| | |___| |_| |  __/  | |___ / ___ \\ | |_) |${NC}"
 echo -e "${MAGENTA}   |____/|_____|\\___/|_|     |_____/_/   \\_\\|____/ ${NC}"
 echo -e "${CYAN}================================================================${NC}"
-echo -e "${YELLOW}           KEXSONHOST x DEUP LABS | DYNAMIC VIRTUAL TERMINAL     ${NC}"
+echo -e "${YELLOW}           KEXSONHOST x DEUP LABS | FIREWALL BYPASS TERMINAL     ${NC}"
 echo -e "${CYAN}================================================================${NC}"
 echo ""
 
@@ -46,7 +46,7 @@ if [ "$ISO_CHOICE" == "2" ]; then
     ISO_NAME="ubuntu-22.04.4-live-server-amd64.iso"
     ISO_URL="https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso"
     DISK_NAME="ubuntu.qcow2"
-    WEB_PORT="6080"
+    WEB_PORT="80"        # Bypass port for direct web access
     SSH_PORT="2222"
     SERVICE_PORT="3389"
 else
@@ -54,7 +54,7 @@ else
     ISO_NAME="proxmox-ve_8.2-1.iso"
     ISO_URL="https://mirrors.apua.org/proxmox/iso/proxmox-ve_8.2-1.iso"
     DISK_NAME="proxmox.qcow2"
-    WEB_PORT="6080"
+    WEB_PORT="80"        # Bypass port for direct web access
     SSH_PORT="2022"
     SERVICE_PORT="8006"
 fi
@@ -68,10 +68,8 @@ USER_RAM=${USER_RAM:-8192}
 read -p "Enter CPU Cores (e.g. 2, 4, 8) [Default 4]: " USER_CPU
 USER_CPU=${USER_CPU:-4}
 
-# User chahe sirf number likhe (50) ya G ke sath (50G), dono ko treat karega safely
 read -p "Enter Disk Size (e.g. 50, 100, 128) [Default 50]: " USER_DISK
 USER_DISK=${USER_DISK:-50}
-# Strip any 'G' or 'g' input to prevent duplicate formatting bugs
 USER_DISK=$(echo "$USER_DISK" | sed 's/[Gg]//g')
 
 echo ""
@@ -104,11 +102,13 @@ else
     echo -e "${GREEN}[+] ISO file detected locally. Skipping download.${NC}"
 fi
 
-# Start noVNC Proxy in Background
-echo -e "${YELLOW}[*] Launching noVNC Proxy Stream on Port $WEB_PORT...${NC}"
+# Kill anything running on Port 80 to free up space
+sudo fuser -k 80/tcp >/dev/null 2>&1
 pkill -f websockify
-sleep 1
-websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &
+
+# Start noVNC Proxy on Port 80
+echo -e "${YELLOW}[*] Launching noVNC Proxy Stream on Bypass Port $WEB_PORT...${NC}"
+sudo websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &
 sleep 2
 
 # Main QEMU Boot Core
@@ -130,8 +130,8 @@ echo ""
 echo -e "${GREEN}================================================================${NC}"
 echo -e "${CYAN}🔥 DEUP LAB APPARATUS SUCCESSFULLY DEPLOYED!${NC}"
 echo -e "${GREEN}================================================================${NC}"
-echo -e "${YELLOW}1. Web Console VNC :${NC} http://<your-vps-ip>:${WEB_PORT}/vnc.html"
+echo -e "${YELLOW}1. Web Console VNC :${NC} http://<your-vps-ip>/vnc.html"
 echo -e "${YELLOW}2. SSH Tunnel Port :${NC} $SSH_PORT"
-echo -e "${YELLOW}3. Dashboard Port  :${NC} $SERVICE_PORT"
-echo -e "${MAGENTA}Note: You can safely close Termius. The node will run 24/7.${NC}"
+echo -e "${YELLOW}3. Dashboard Port  :${NC} $SERVICE_PORT (Requires firewall rule unblock)"
+echo -e "${MAGENTA}Note: Port 80 bypass active. Open link directly without any port numbers!${NC}"
 echo -e "${GREEN}================================================================${NC}"
