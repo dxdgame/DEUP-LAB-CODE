@@ -24,7 +24,7 @@ echo -e "${YELLOW}           KEXSONHOST x DEUP LABS | DYNAMIC VIRTUAL TERMINAL  
 echo -e "${CYAN}================================================================${NC}"
 echo ""
 
-# Dependencies Auto-Installation (Fixed package formatting)
+# Dependencies Auto-Installation
 echo -e "${YELLOW}[*] Validating core dependencies...${NC}"
 sudo apt update && sudo apt install -y qemu-system-x86 qemu-utils wget novnc websockify
 clear
@@ -38,24 +38,24 @@ echo ""
 # --- USER INPUT CONTROLS ---
 
 echo -e "${YELLOW}Select Installation Mode:${NC}"
-echo -e " 1) Proxmox VE 8.2 (Latest Mirror)"
+echo -e " 1) Proxmox VE 8.2 (Working Mirror)"
 echo -e " 2) Ubuntu Server 22.04"
 read -p "Enter choice (1 or 2): " ISO_CHOICE
 
 if [ "$ISO_CHOICE" == "2" ]; then
-    ISO_NAME="ubuntu-22.04.4-live-server-amd64.iso"[cite: 1]
-    ISO_URL="https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso"[cite: 1]
-    DISK_NAME="ubuntu.qcow2"[cite: 1]
-    WEB_PORT="6080"[cite: 1]
-    SSH_PORT="2222"[cite: 1]
-    SERVICE_PORT="3389"[cite: 1]
+    ISO_NAME="ubuntu-22.04.4-live-server-amd64.iso"
+    ISO_URL="https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso"
+    DISK_NAME="ubuntu.qcow2"
+    WEB_PORT="6080"
+    SSH_PORT="2222"
+    SERVICE_PORT="3389"
 else
-    # Updated Working Mirror for Proxmox VE 8.2
+    # Proxmox VE 8.2 Working Download Link
     ISO_NAME="proxmox-ve_8.2-1.iso"
     ISO_URL="https://enterprise.proxmox.com/iso/proxmox-ve_8.2-1.iso"
     DISK_NAME="proxmox.qcow2"
-    WEB_PORT="6080"[cite: 1]
-    SSH_PORT="2022"[cite: 1]
+    WEB_PORT="6080"
+    SSH_PORT="2022"
     SERVICE_PORT="8006"
 fi
 
@@ -63,13 +63,13 @@ echo ""
 echo -e "${CYAN}--- HARDWARE ALLOCATION ---${NC}"
 
 read -p "Enter RAM in MB (e.g. 2048, 4096, 8192) [Default 8192]: " USER_RAM
-USER_RAM=${USER_RAM:-8192}[cite: 1]
+USER_RAM=${USER_RAM:-8192}
 
 read -p "Enter CPU Cores (e.g. 2, 4, 8) [Default 4]: " USER_CPU
-USER_CPU=${USER_CPU:-4}[cite: 1]
+USER_CPU=${USER_CPU:-4}
 
 read -p "Enter Disk Size in GB (e.g. 20, 50, 100) [Default 50]: " USER_DISK
-USER_DISK=${USER_DISK:-50}[cite: 1]
+USER_DISK=${USER_DISK:-50}
 
 echo ""
 echo -e "${GREEN}[+] Configuration Captured Successfully!${NC}"
@@ -85,10 +85,10 @@ read -p "Press [ENTER] to lock configurations and deploy..."
 
 # --- AUTOMATION EXECUTION ---
 
-# Check and Create Disk (Fixed format string)
+# Check and Create Disk
 if [ ! -f "$DISK_NAME" ]; then
     echo -e "${YELLOW}[*] Creating ${USER_DISK}G Virtual Disk Asset...${NC}"
-    qemu-img create -f qcow2 "$DISK_NAME" "${USER_DISK}G"[cite: 1]
+    qemu-img create -f qcow2 "$DISK_NAME" "${USER_DISK}G"
 else
     echo -e "${GREEN}[+] Disk image already exists. Skipping creation.${NC}"
 fi
@@ -105,10 +105,10 @@ fi
 echo -e "${YELLOW}[*] Launching noVNC Proxy Stream on Port $WEB_PORT...${NC}"
 pkill -f websockify
 sleep 1
-websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &[cite: 1]
+websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &
 sleep 2
 
-# Main QEMU Boot Core
+# Main QEMU Boot Core (24/7 Background Session)
 echo -e "${GREEN}[*] Starting Hypervisor via DEUP LAB TCG Engine...${NC}"
 
 nohup qemu-system-x86_64 \
@@ -121,14 +121,14 @@ nohup qemu-system-x86_64 \
   -cdrom "$ISO_NAME" \
   -boot d \
   -net nic -net user,hostfwd=tcp::${SSH_PORT}-:22,hostfwd=tcp::${SERVICE_PORT}-:${SERVICE_PORT} \
-  -vnc :0 > deup_qemu.log 2>&1 &[cite: 1]
+  -vnc :0 > deup_qemu.log 2>&1 &
 
 echo ""
 echo -e "${GREEN}================================================================${NC}"
 echo -e "${CYAN}🔥 DEUP LAB APPARATUS SUCCESSFULLY DEPLOYED!${NC}"
 echo -e "${GREEN}================================================================${NC}"
-echo -e "${YELLOW}1. Web Console VNC :${NC} http://<your-vps-ip>:${WEB_PORT}/vnc.html"[cite: 1]
-echo -e "${YELLOW}2. SSH Tunnel Port :${NC} $SSH_PORT"[cite: 1]
+echo -e "${YELLOW}1. Web Console VNC :${NC} http://<your-vps-ip>:${WEB_PORT}/vnc.html"
+echo -e "${YELLOW}2. SSH Tunnel Port :${NC} $SSH_PORT"
 echo -e "${YELLOW}3. Dashboard Port  :${NC} $SERVICE_PORT"
 echo -e "${MAGENTA}Note: You can safely close Termius. The node will run 24/7.${NC}"
 echo -e "${GREEN}================================================================${NC}"
