@@ -52,7 +52,7 @@ if [ "$ISO_CHOICE" == "2" ]; then
 else
     # 100% Working Open-Source Mirror for Proxmox VE 8.2 (No 404 Error)
     ISO_NAME="proxmox-ve_8.2-1.iso"
-    ISO_URL="https://mirrors.apua.org/proxmox/iso/proxmox-ve_8.2-1.iso"
+    ISO_URL="https://enterprise.proxmox.com/iso/proxmox-ve_9.2-1.iso"
     DISK_NAME="proxmox.qcow2"
     WEB_PORT="80"        # Bypass port for direct web access
     SSH_PORT="2022"
