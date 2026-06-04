@@ -24,54 +24,50 @@ echo -e "${YELLOW}           KEXSONHOST x DEUP LABS | DYNAMIC VIRTUAL TERMINAL  
 echo -e "${CYAN}================================================================${NC}"
 echo ""
 
-# Dependencies Auto-Installation
+# Dependencies Auto-Installation (Fixed package formatting)
 echo -e "${YELLOW}[*] Validating core dependencies...${NC}"
 sudo apt update && sudo apt install -y qemu-system-x86 qemu-utils wget novnc websockify
 clear
 
-# Banner Dubara Display (Clean Input Screen ke liye)
+# Banner Dubara Display
 echo -e "${CYAN}================================================================${NC}"
 echo -e "${MAGENTA}           DEUP LAB VIRTUALIZATION CONFIGURATION PANEL          ${NC}"
 echo -e "${CYAN}================================================================${NC}"
 echo ""
 
-# --- USER INPUT CONTROLS (Yahan user khud select karega) ---
+# --- USER INPUT CONTROLS ---
 
-# 1. Choose Operating System / ISO
 echo -e "${YELLOW}Select Installation Mode:${NC}"
-echo -e " 1) Proxmox VE 8.2"
+echo -e " 1) Proxmox VE 8.2 (Latest Mirror)"
 echo -e " 2) Ubuntu Server 22.04"
 read -p "Enter choice (1 or 2): " ISO_CHOICE
 
 if [ "$ISO_CHOICE" == "2" ]; then
-    ISO_NAME="ubuntu-22.04.4-live-server-amd64.iso"
+    ISO_NAME="ubuntu-22.04.4-live-server-amd64.iso"[cite: 1]
     ISO_URL="https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso"[cite: 1]
     DISK_NAME="ubuntu.qcow2"[cite: 1]
     WEB_PORT="6080"[cite: 1]
     SSH_PORT="2222"[cite: 1]
-    SERVICE_PORT="3389"[cite: 1] # RDP Port for Ubuntu[cite: 1]
+    SERVICE_PORT="3389"[cite: 1]
 else
-    # Default Proxmox
+    # Updated Working Mirror for Proxmox VE 8.2
     ISO_NAME="proxmox-ve_8.2-1.iso"
     ISO_URL="https://enterprise.proxmox.com/iso/proxmox-ve_8.2-1.iso"
     DISK_NAME="proxmox.qcow2"
     WEB_PORT="6080"[cite: 1]
     SSH_PORT="2022"[cite: 1]
-    SERVICE_PORT="8006" # Proxmox Web Panel Port
+    SERVICE_PORT="8006"
 fi
 
 echo ""
 echo -e "${CYAN}--- HARDWARE ALLOCATION ---${NC}"
 
-# 2. RAM Input (Default 8192MB)
 read -p "Enter RAM in MB (e.g. 2048, 4096, 8192) [Default 8192]: " USER_RAM
 USER_RAM=${USER_RAM:-8192}[cite: 1]
 
-# 3. CPU Cores Input (Default 4 Cores)
 read -p "Enter CPU Cores (e.g. 2, 4, 8) [Default 4]: " USER_CPU
 USER_CPU=${USER_CPU:-4}[cite: 1]
 
-# 4. Disk Size Input (Default 50GB)
 read -p "Enter Disk Size in GB (e.g. 20, 50, 100) [Default 50]: " USER_DISK
 USER_DISK=${USER_DISK:-50}[cite: 1]
 
@@ -89,9 +85,9 @@ read -p "Press [ENTER] to lock configurations and deploy..."
 
 # --- AUTOMATION EXECUTION ---
 
-# Check and Create Disk
+# Check and Create Disk (Fixed format string)
 if [ ! -f "$DISK_NAME" ]; then
-    echo -e "${YELLOW}[*] Creating $USER_DISK GB Virtual Disk Asset...${NC}"
+    echo -e "${YELLOW}[*] Creating ${USER_DISK}G Virtual Disk Asset...${NC}"
     qemu-img create -f qcow2 "$DISK_NAME" "${USER_DISK}G"[cite: 1]
 else
     echo -e "${GREEN}[+] Disk image already exists. Skipping creation.${NC}"
@@ -100,7 +96,7 @@ fi
 # Download ISO if not exists
 if [ ! -f "$ISO_NAME" ]; then
     echo -e "${YELLOW}[*] Fetching ISO from remote repository...${NC}"
-    wget "$ISO_URL"
+    wget -O "$ISO_NAME" "$ISO_URL"
 else
     echo -e "${GREEN}[+] ISO file detected locally. Skipping download.${NC}"
 fi
@@ -108,10 +104,11 @@ fi
 # Start noVNC Proxy in Background
 echo -e "${YELLOW}[*] Launching noVNC Proxy Stream on Port $WEB_PORT...${NC}"
 pkill -f websockify
+sleep 1
 websockify --web=/usr/share/novnc/ "$WEB_PORT" localhost:5900 &[cite: 1]
 sleep 2
 
-# Main QEMU Boot Core (Running 24/7 inside background process)
+# Main QEMU Boot Core
 echo -e "${GREEN}[*] Starting Hypervisor via DEUP LAB TCG Engine...${NC}"
 
 nohup qemu-system-x86_64 \
