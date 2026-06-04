@@ -114,18 +114,18 @@ sleep 2
 # Main QEMU Boot Core
 echo -e "${GREEN}[*] Starting Hypervisor via DEUP LAB TCG Engine...${NC}"
 
-nohup qemu-system-x86_64 \
+qemu-system-x86_64 \
   -machine pc \
   -cpu qemu64 \
   -m "$USER_RAM" \
   -smp "$USER_CPU" \
   -accel tcg \
-  -drive file="$DISK_NAME",format=qcow2 \
-  -cdrom "$ISO_NAME" \
+  -drive file=proxmox.qcow2,format=qcow2 \
+  -cdrom proxmox-ve_8.2-1.iso \
   -boot d \
   -net nic -net user,hostfwd=tcp::${SSH_PORT}-:22,hostfwd=tcp::${SERVICE_PORT}-:${SERVICE_PORT} \
-  -vnc :0 > deup_qemu.log 2>&1 &
-
+  -vnc :0 
+  
 echo ""
 echo -e "${GREEN}================================================================${NC}"
 echo -e "${CYAN}🔥 DEUP LAB APPARATUS SUCCESSFULLY DEPLOYED!${NC}"
